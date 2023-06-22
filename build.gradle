@@ -23,6 +23,8 @@ dependencies {
 
     implementation 'net.exsource:open-logger:1.0.1-SNAPSHOT'
     implementation 'org.jetbrains:annotations:24.0.1'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+
 
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'org.apache.commons:commons-text:1.10.0'

@@ -10,11 +10,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+@SuppressWarnings("unused")
 public class CommonIO {
 
     private static final Logger logger = Logger.getLogger();
@@ -288,5 +290,40 @@ public class CommonIO {
         return capacity;
     }
 
+    /**
+     * This function gets the directory from the current running java program.
+     *
+     * @param indicator a class from the packed .jar file as indicator.
+     * @return File - directory as file. Can be null if no class indicator was found.
+     * @see URISyntaxException
+     * @see File
+     */
+    public static File getProgramDirectory(Class<?> indicator) {
+        File result = null;
+        try {
+            result = new File(indicator.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+        } catch (URISyntaxException exception) {
+            logger.error(exception);
+        }
+        return result;
+    }
+
+    /**
+     * This function gets the parent directory from the current running java program.
+     *
+     * @param indicator a class from the packed .jar file as indicator.
+     * @return File - directory as file. Can be null if no class indicator was found.
+     * @see NullPointerException
+     * @see File
+     */
+    public static File getProgramParentDirectory(Class<?> indicator) {
+        File result = null;
+        try {
+            result = new File(getProgramDirectory(indicator).getParentFile().getPath());
+        } catch (NullPointerException exception) {
+            logger.error(exception);
+        }
+        return result;
+    }
 
 }
