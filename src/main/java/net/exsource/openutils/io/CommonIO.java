@@ -174,6 +174,19 @@ public class CommonIO {
         return converted[converted.length - 1];
     }
 
+    /**
+     * This function created form a raw resource an {@link ByteBuffer}.
+     * We used for the progress the following functions {@link #toByteArray(InputStream, int)}
+     * and {@link #resurceToInputStream(String)}
+     * Warning a buffer size which is out of bounds for the given resource,
+     * can be ended in an error.
+     *
+     * @param resource the resource is any file you want.
+     * @param bufferSize the buffer size you need.
+     * @return ByteBuffer - the finished {@link ByteBuffer} object.
+     * @see IOException
+     * @see ByteBuffer
+     */
     public static ByteBuffer resourceToByteBuffer(@NotNull String resource, int bufferSize) {
         ByteBuffer data = null;
         try {
@@ -191,10 +204,31 @@ public class CommonIO {
         return data;
     }
 
+    /**
+     * This function created form a raw resource an {@link ByteBuffer}.
+     * It will use his parent function {@link #resourceToByteBuffer(String, int)} and
+     * he used the {@link #calculateBufferCapacity(String)} for the buffer size.
+     * This means it will calculate from the resource itself.
+     *
+     * @param resource the resource is any file you want.
+     * @return ByteBuffer - the finished {@link ByteBuffer} object.
+     * @see IOException
+     * @see ByteBuffer
+     */
     public static ByteBuffer resourceToByteBuffer(@NotNull String resource) {
         return resourceToByteBuffer(resource, calculateBufferCapacity(resource));
     }
 
+    /**
+     * This function convert a raw file resource to an {@link InputStream}.
+     * The stream is for example used at {@link #resourceToByteBuffer(String, int)}.
+     *
+     * @param resource the resource which need to be converted.
+     * @return InputStream - the created stream from the given resource.
+     * @throws IOException if the resource not found.
+     * @see IOException
+     * @see InputStream
+     */
     public static InputStream resurceToInputStream(@NotNull String resource) throws IOException {
         InputStream stream;
         File file = new File(resource);
@@ -207,6 +241,16 @@ public class CommonIO {
         return stream;
     }
 
+    /**
+     * This function creates a byte array from {@link InputStream}.
+     * This is helpful for functions like {@link #resourceToByteBuffer(String)}.
+     *
+     * @param stream the input stream which need to convert.
+     * @param size the byte array size.
+     * @return byte[] - the bytes from the stream as array.
+     * @see IOException
+     * @see InputStream
+     */
     public static byte[] toByteArray(@NotNull InputStream stream, int size) {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         int read;
@@ -224,6 +268,14 @@ public class CommonIO {
         return buffer.toByteArray();
     }
 
+    /**
+     * This function generates the capacity from a raw resource.
+     * This is a better function to that step. Use at {@link #resourceToByteBuffer(String)}.
+     *
+     * @param path the file path to the resource.
+     * @return Integer - the generated capacity.
+     * @see InputStream
+     */
     public static int calculateBufferCapacity(@NotNull String path) {
         int capacity = 0;
         try {
