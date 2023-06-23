@@ -1,20 +1,23 @@
 package net.exsource.openutils;
 
 import net.exsource.openlogger.Logger;
-import net.exsource.openutils.io.IOController;
-import net.exsource.openutils.io.controller.PropertiesController;
+import net.exsource.openutils.io.controller.IniController;
+
+import java.io.File;
+import java.io.IOException;
 
 public class Example {
 
     private static final Logger logger = Logger.getLogger();
 
-    public static void main(String[] args) {
-        PropertiesController controller = (PropertiesController) IOController.fromArgs(args, PropertiesController.class);
-        if(controller == null) {
-            logger.warn("NOT GOOD...");
-            return;
-        }
-        logger.info(controller.getClass().getSimpleName());
+    public static void main(String[] args) throws IOException {
+        Logger.enableDebug(true);
+        IniController controller = new IniController();
+        controller.load(new File("example.ini"));
+
+        logger.info(controller.getClass().getSimpleName() + " -> " + controller.getValue( "ui-style", String.class));
+        logger.info(controller.getClass().getSimpleName() + " -> " + controller.getValue( "ui-scale", int.class));
+        logger.info(controller.getClass().getSimpleName() + " -> " + controller.getValue( "ui-antialiasing", Boolean.class));
     }
 
 }
