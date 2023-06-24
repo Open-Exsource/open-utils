@@ -1,0 +1,59 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+group = 'net.exsource'
+version = '1.0.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+
+    maven {
+        allowInsecureProtocol = true
+        url = 'http://45.138.48.139:8081/repository/maven-public/'
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+dependencies {
+
+    implementation 'net.exsource:open-logger:1.0.0-SNAPSHOT'
+    implementation 'org.jetbrains:annotations:24.0.1'
+
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+    implementation 'org.apache.commons:commons-text:1.10.0'
+    implementation 'commons-io:commons-io:2.13.0'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
+}
+
+//ToDo: change entries if the domain nexus.exsource.net reachable.
+String getPublishUrl() {
+    return version.endsWith("SNAPSHOT") ? "http://45.138.48.139:8081/repository/maven-snapshots/" : "http://45.138.48.139:8081/repository/maven-releases/"
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+
+
+    repositories {
+        maven {
+            allowInsecureProtocol = true
+            url getPublishUrl()
+
+            credentials {
+                username project.repoUser
+                password project.repoPassword
+            }
+        }
+    }
+}
