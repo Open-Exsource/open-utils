@@ -138,6 +138,18 @@ public class PropertiesController extends IOController {
         return returnedMap;
     }
 
+    public Map<String, Object> getEntries() {
+        return resultMap;
+    }
+
+    public List<String> getProperties() {
+        List<String> intern = new ArrayList<>();
+        for(String key : resultMap.keySet()) {
+            intern.add(key + ":" + resultMap.get(key));
+        }
+        return intern;
+    }
+
     private void includeEntryInMap(@NotNull String in, final Map<String, Object> out) {
         if(out == null) {
             logger.error("The map to store can't be null!");

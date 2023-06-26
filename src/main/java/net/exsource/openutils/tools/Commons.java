@@ -1,20 +1,18 @@
 package net.exsource.openutils.tools;
 
 import net.exsource.openlogger.Logger;
+import net.exsource.openlogger.util.ConsoleColor;
 import org.apache.commons.lang3.ClassUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.*;
 
 @SuppressWarnings("unused")
 public class Commons {
@@ -326,6 +324,72 @@ public class Commons {
         return result;
     }
 
+    /**
+     * This function saved a resource from the internal resource folder into a given output folder.
+     * Note that this function is currently not 100% tested! This means there can be throw exceptions
+     *  that are not handled yet. This function worked with {@link InputStream}'s and {@link OutputStream}'s
+     * for handling files. Note that files with commits can be corrupted after overriding because the
+     * commits will be added randomly.
+     * @param resource the file which is existed internal.
+     * @param out the specified output path, if this wasn't found, the function created the folder.
+     * @param override this means that's this file will be overridden after any call this function.
+     * @apiNote this function is already in development! Last update: 26.06.2023
+     * @see File
+     * @see FileOutputStream
+     */
+    public static void saveResource(@NotNull String resource, @NotNull String out, boolean override) {
+        if(resource.startsWith("/"))
+            resource = resource.substring(1);
+
+        URL url = Thread.currentThread().getContextClassLoader().getResource(resource);
+        if(url == null) {
+            logger.warn("Can't find [ " + ConsoleColor.YELLOW + resource + ConsoleColor.RESET + " ]");
+            return;
+        }
+
+        InputStream inStream;
+        FileOutputStream outputStream;
+
+        try {
+            File file = new File(url.toURI());
+            String filename;
+            if(resource.contains("/"))
+                filename = resource.substring(resource.lastIndexOf("/"));
+            else
+                filename = resource;
+
+            File outPath = new File(out);
+            if(!outPath.exists() && outPath.mkdirs())
+                logger.debug("Created missing directories [ " + ConsoleColor.CYAN + outPath.getPath() + ConsoleColor.RESET + " ]");
+
+            if(!file.exists()) {
+                logger.warn("Can't find file " + ConsoleColor.YELLOW + file.getAbsolutePath() + ConsoleColor.RESET);
+                return;
+            }
+
+            if(!outPath.exists()) {
+                logger.warn("Can't find out path " + ConsoleColor.YELLOW + outPath.getAbsolutePath() + ConsoleColor.RESET);
+                return;
+            }
+
+            File output = new File(outPath.getPath() + "/" + filename);
+            if(output.exists() && !override)
+                return;
+
+            inStream = resurceToInputStream(resource);
+            outputStream = new FileOutputStream(output);
+            int character;
+            while ((character = inStream.read()) != -1) {
+                outputStream.write(character);
+            }
+
+            inStream.close();
+            outputStream.close();
+        } catch (URISyntaxException | IOException exception) {
+            logger.error(exception);
+        }
+    }
+
     /* =================================================================================
      *
      *                               Cast Functions
@@ -387,4 +451,108 @@ public class Commons {
         return (T) object;
     }
 
+    /* =================================================================================
+     *
+     *                              String Functions
+     *
+     * ================================================================================= */
+
+    /**
+     * This function generates a random string from the given {@link StringPattern} enum.
+     * The enum contains many patterns for a specified algorithm. You can choose any of this pattern.
+     * The UUID pattern used the default {@link UUID} class for generation. All other patterns were created
+     * by the api developers.
+     * @param pattern the generation pattern.
+     * @param length the string output path.
+     * @return String - the generated string from this function.
+     * @apiNote Note that this function can't return null. This function can be used in all of yor classes,
+     * it is helpfully for generated unique ids or names.
+     * @see StringPattern
+     * @see StandardCharsets
+     */
+    public static String generateString(StringPattern pattern, int length) {
+        String result;
+        if(length <= 0) {
+            logger.warn("You will create a randomized string with a length equals or less 0?");
+            length = 8;
+        }
+
+        if(pattern == null) {
+            byte[] bytes = new byte[length];
+            new Random().nextBytes(bytes);
+            result = new String(bytes, StandardCharsets.UTF_8);
+            logger.warn("Create a randomized string from old java code because the pattern is null!");
+        } else {
+            byte[] bytes = new byte[256];
+            new Random().nextBytes(bytes);
+            String randomString = new String(bytes, StandardCharsets.UTF_8);
+            String replacer;
+
+            if(pattern.equals(StringPattern.UUID_FORMAT))
+                result = UUID.randomUUID().toString();
+            else {
+                replacer = randomString.replaceAll(pattern.getPattern(), "");
+                result = randomFormatted(replacer, length);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * This private function generates the string from the input string.
+     * The input can be ABC... etc. The function worked with for-loops to catch
+     * single chars from the input string to create a random result.
+     * This function is used by {@link #generateString(StringPattern, int)}
+     * @param in the given converted pattern string.
+     * @param length the allowed sting build length.
+     * @return String - the finished created random string.
+     * @see StringBuffer
+     */
+    private static String randomFormatted(String in, int length) {
+        StringBuilder builder = new StringBuilder();
+        for(int i = 0; i < in.length(); i++) {
+            if(Character.isLetter(in.charAt(i)) && (length > 0)
+                    || Character.isDigit(in.charAt(i)) && (length > 0)) {
+                builder.append(in.charAt(i));
+                length--;
+            }
+        }
+        return builder.toString();
+    }
+
+    /* =================================================================================
+     *
+     *                               Read Functions
+     *
+     * ================================================================================= */
+
+    /**
+     * This function read a document and split it in string lines.
+     * This lines will be added to a {@link List<String>} with the {@link List#add(Object)} function.
+     * Please note that it is not important to declarative which file type it is.
+     * <p>
+     * @param document the document you need to read.
+     * @return List<String> - the string list of the single lines.
+     */
+    public static List<String> readDocument(@NotNull String document) {
+        List<String> lines = new ArrayList<>();
+
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(document));
+
+            String line;
+            try {
+                while ((line = reader.readLine()) != null) {
+                    lines.add(line);
+                }
+            } catch (IOException exception) {
+                logger.error(exception);
+            }
+        } catch (FileNotFoundException exception) {
+            logger.error(exception);
+        }
+
+        return lines;
+    }
 }

@@ -48,9 +48,11 @@ public class TestManager {
             logger.warn("Test:checkProgramArguments -> can't create controller!");
             return;
         }
+
         logger.debug("====================> Properties <====================");
-        logger.debug("ui-style -> " + controller.getValue("ui-style", String.class));
-        logger.debug("ui-logic -> " + controller.getValue("ui-logic", String.class));
+        for(String entries : controller.getProperties()) {
+            logger.debug(entries);
+        }
         logger.debug("====================> Properties <====================");
     }
 
@@ -61,6 +63,7 @@ public class TestManager {
             logger.warn("Test:checkProgramArguments -> can't create controller!");
             return;
         }
+
         logger.debug("====================> Ini <====================");
         logger.debug("ui-style -> " + controller.getValue("ui-style", String.class));
         logger.debug("ui-logic -> " + controller.getValue("ui-logic", String.class));
