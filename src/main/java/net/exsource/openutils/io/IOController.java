@@ -27,10 +27,6 @@ public abstract class IOController {
 
     public abstract <T> T getValue(@NotNull String key, Class<T> cast);
 
-    public abstract boolean hasKey(@NotNull String key);
-
-    public abstract <T> T getValue(@NotNull String key, Class<T> cast);
-
     protected void setResource(@NotNull File file) {
         this.resource = file;
     }

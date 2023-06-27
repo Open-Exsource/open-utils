@@ -150,6 +150,18 @@ public class PropertiesController extends IOController {
         return intern;
     }
 
+    public boolean isEmpty() {
+        return resultMap.isEmpty();
+    }
+
+    public int getSize() {
+        return resultMap.size();
+    }
+
+    public void clear() {
+        resultMap.clear();
+    }
+
     private void includeEntryInMap(@NotNull String in, final Map<String, Object> out) {
         if(out == null) {
             logger.error("The map to store can't be null!");
