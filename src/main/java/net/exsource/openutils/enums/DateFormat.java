@@ -1,4 +1,4 @@
-package net.exsource.openutils.tools;
+package net.exsource.openutils.enums;
 
 import java.text.SimpleDateFormat;
 

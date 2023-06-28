@@ -2,10 +2,10 @@ package net.exsource.openutils;
 
 import net.exsource.openlogger.Logger;
 import net.exsource.openutils.io.controller.PropertiesController;
+import net.exsource.openutils.enums.OperationSystem;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 
 public class Example {
 
@@ -15,11 +15,11 @@ public class Example {
         Logger.enableDebug(true);
         PropertiesController controller = new PropertiesController();
         controller.load(new File("example.properties"));
+        logger.debug("Operating System -> " + OperationSystem.getCurrent());
 
-        logger.debug(controller.getClass().getSimpleName() + " -> " + controller.getValue("test-string", String.class));
-        logger.debug(controller.getClass().getSimpleName() + " -> " + controller.getValue("test-number", Integer.class));
-        logger.debug(controller.getClass().getSimpleName() + " -> " + Arrays.toString(controller.getValueAsArray("test-array")));
-        logger.debug(controller.getClass().getSimpleName() + " -> " + controller.getValue("test-map", String.class));
+        controller.add("writer-test", "testedValue");
+        controller.remove("test-string");
+        controller.saveAs("properties/test.properties");
     }
 
 }

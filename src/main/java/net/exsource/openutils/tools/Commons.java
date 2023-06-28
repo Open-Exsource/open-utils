@@ -2,6 +2,8 @@ package net.exsource.openutils.tools;
 
 import net.exsource.openlogger.Logger;
 import net.exsource.openlogger.util.ConsoleColor;
+import net.exsource.openutils.enums.DateFormat;
+import net.exsource.openutils.enums.StringPattern;
 import org.apache.commons.lang3.ClassUtils;
 import org.jetbrains.annotations.NotNull;
 

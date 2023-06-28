@@ -3,6 +3,8 @@ package net.exsource.openutils.io;
 import net.exsource.openlogger.Logger;
 import net.exsource.openutils.io.controller.IniController;
 import net.exsource.openutils.io.controller.PropertiesController;
+import net.exsource.openutils.tools.Commons;
+import net.exsource.openutils.enums.StringPattern;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -13,9 +15,11 @@ public abstract class IOController {
 
     protected static final Logger logger = Logger.getLogger();
 
+    private final String ID;
     private File resource;
 
     public IOController() {
+        this.ID = getClass().getSimpleName() + "-" + Commons.generateString(StringPattern.NUMBERS, 3);
         this.resource = null;
     }
 
@@ -33,6 +37,10 @@ public abstract class IOController {
 
     public File getResource() {
         return resource;
+    }
+
+    public String getID() {
+        return ID;
     }
 
     @SuppressWarnings("unchecked")

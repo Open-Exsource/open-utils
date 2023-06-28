@@ -8,7 +8,7 @@ import net.exsource.openutils.io.IOController;
 import net.exsource.openutils.io.controller.IniController;
 import net.exsource.openutils.io.controller.PropertiesController;
 import net.exsource.openutils.tools.Commons;
-import net.exsource.openutils.tools.DateFormat;
+import net.exsource.openutils.enums.DateFormat;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

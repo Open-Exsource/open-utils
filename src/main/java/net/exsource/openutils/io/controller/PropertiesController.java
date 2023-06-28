@@ -1,6 +1,9 @@
 package net.exsource.openutils.io.controller;
 
+import net.exsource.openlogger.util.ConsoleColor;
 import net.exsource.openutils.io.IOController;
+import net.exsource.openutils.tools.Commons;
+import net.exsource.openutils.enums.DateFormat;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,12 +15,32 @@ import java.util.regex.Pattern;
 
 import static net.exsource.openutils.tools.Commons.cast;
 
+/**
+ * This class controls .properties files, or it used {@link IOController#fromArgs(String[], Class)} to
+ * convert it in to properties. You can create or edit properties with this class.
+ * To use this class you need to create an instance of this class object. The following functions will do
+ * that for you {@link IOController#fromArgs(String[], Class)} or you create it by
+ * [ PropertiesController controller = new PropertiesController(); ] java standard.
+ * If you used the function as indicator you can't use the {@link #save()} function, but if you wish
+ * to save the current properties state you can use the {@link #saveAs(String)} or {@link #saveAs(File)}
+ * function. This functions will create a new file at the specified parameter which ar given by you.
+ * <p>
+ * @since 1.0.0
+ * @see IOController
+ * @author Daniel Ramke
+ */
 @SuppressWarnings("unused")
 public class PropertiesController extends IOController {
 
     private static final Pattern COMMENT_LINE = Pattern.compile("^[;|#].*");
     private static final Pattern KEY_VALUE_PATTER = Pattern.compile( "\\s*([^=]*)=(.*)" );
     private final Map<String, Object> resultMap = new LinkedHashMap<>();
+
+    private boolean autoSave;
+
+    public PropertiesController() {
+        this.autoSave = false;
+    }
 
     public void load(final InputStream stream) throws IOException {
         logger.debug("Try loading .properties file...");
@@ -32,6 +55,7 @@ public class PropertiesController extends IOController {
 
     @Override
     public void load(@NotNull File file) throws IOException {
+        this.setResource(file);
         load(new FileInputStream(file));
     }
 
@@ -94,6 +118,116 @@ public class PropertiesController extends IOController {
         }
 
         logger.debug("Finished parsing .properties file successfully!");
+    }
+
+    public void save() {
+        if(!useFile()) {
+            logger.debug("Properties ( " + getID() + " ) can't be saved because it's not a file!");
+            return;
+        }
+
+        File output = getResource();
+        if(!output.exists()) {
+            logger.error(new FileNotFoundException("Can't find " + output.getName()));
+            return;
+        }
+
+        int entryIndex = 0;
+        StringBuilder text = new StringBuilder();
+        text.append("# Updated at: ").append(Commons.parseDateToString(new Date(), DateFormat.DATE_TIME)).append("\n");
+        for(String key : resultMap.keySet()) {
+            entryIndex++;
+            if(entryIndex < resultMap.size()) {
+                text.append(key).append(" = ").append(resultMap.get(key)).append("\n");
+            } else {
+                text.append(key).append(" = ").append(resultMap.get(key));
+            }
+        }
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(output));
+            writer.write(text.toString());
+            writer.close();
+            logger.debug("Properties ( " + getID() + " ) saved!");
+        } catch (IOException exception) {
+            logger.error(exception);
+        }
+    }
+
+    public void saveAs(@NotNull File file) {
+        this.setResource(file);
+
+        try {
+            boolean wasCreatingDirectories = false;
+            File directory = Commons.getDirectoryFromFile(file);
+            if(directory.mkdirs()) {
+                wasCreatingDirectories = true;
+            }
+
+            if (file.createNewFile()) {
+                logger.info("Creating properties file: " + file.getName() + ", and directories: " + wasCreatingDirectories);
+            }
+
+            this.save();
+        } catch (IOException exception) {
+            logger.error(exception);
+        }
+    }
+
+    public void saveAs(@NotNull String file) {
+        this.saveAs(new File(file));
+    }
+
+    public void add(@NotNull String key, Object value) {
+        if(hasKey(key)) {
+            logger.debug(ConsoleColor.YELLOW + "Warning:" + ConsoleColor.RESET +
+                    " The key: " + ConsoleColor.YELLOW + key + ConsoleColor.RESET + ", was found and can't be duplicated!");
+            return;
+        }
+        resultMap.put(key, value);
+        if(autoSave) {
+            save();
+        }
+    }
+
+    public void replace(@NotNull String key, Object value) {
+        if(!hasKey(key)) {
+            add(key, value);
+            return;
+        }
+        resultMap.replace(key, value);
+        if(autoSave) {
+            save();
+        }
+    }
+
+    public void remove(@NotNull String key) {
+        if(!hasKey(key)) {
+            logger.debug(ConsoleColor.YELLOW + "Warning:" + ConsoleColor.RESET +
+                    " The key: " + ConsoleColor.YELLOW + key + ConsoleColor.RESET + ", wasn't found!");
+            return;
+        }
+        resultMap.remove(key);
+        if(autoSave) {
+            save();
+        }
+    }
+
+    public void enableAutoSave() {
+        this.autoSave = true;
+        logger.debug("Properties ( " + getID() + " ) enable auto-save!");
+    }
+
+    public void disableAutoSave() {
+        this.autoSave = false;
+        logger.debug("Properties ( " + getID() + " ) disable auto-save!");
+    }
+
+    public boolean usedAutoSave() {
+        return autoSave;
+    }
+
+    public boolean useFile() {
+        return getResource() != null;
     }
 
     @Override
