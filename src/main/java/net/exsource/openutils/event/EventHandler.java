@@ -12,4 +12,6 @@ public @interface EventHandler {
 
     EventPriority priority() default EventPriority.MODERATE;
 
+    boolean ignoreCancelled() default false;
+
 }

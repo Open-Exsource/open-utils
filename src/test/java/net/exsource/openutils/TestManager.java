@@ -30,7 +30,8 @@ public class TestManager {
     void checkEventCanNeCalled() {
         EventManager.registerListener(new TestListener());
 
-        EventManager.callEvent(new TestEvent("Junit Test"));
+        TestEvent event = new TestEvent();
+        EventManager.callEvent(event);
     }
 
     @Test

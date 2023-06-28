@@ -1,16 +1,22 @@
 package net.exsource.openutils.event;
 
 
-public class TestEvent extends Event {
+public class TestEvent implements Event, Cancelable {
 
-    private final String exampleName;
+    private boolean cancelled;
 
-    public TestEvent(String exampleName) {
-        this.exampleName = exampleName;
+    @Override
+    public boolean isCancelled() {
+        return cancelled;
     }
 
-    public String getExampleName() {
-        return exampleName;
+    @Override
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
     }
 
+    @Override
+    public String getName() {
+        return getClass().getSimpleName();
+    }
 }

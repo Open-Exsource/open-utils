@@ -1,16 +1,7 @@
 package net.exsource.openutils.event;
 
-import org.jetbrains.annotations.NotNull;
+public interface Event {
 
-public abstract class Event {
-
-    private String name;
-
-    @NotNull
-    public String getEventName() {
-        if(name == null)
-            name = getClass().getSimpleName();
-        return name;
-    }
+    String getName();
 
 }
