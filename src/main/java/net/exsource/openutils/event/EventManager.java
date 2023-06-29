@@ -85,7 +85,7 @@ public class EventManager {
 
     private static void registerListener(Method method, Object listener) {
         Class<? extends Event> cls = method.getParameterTypes()[0].asSubclass(Event.class);
-        if(!method.isAccessible()) {
+        if(!method.canAccess(listener)) { //ToDo: check that this is in a good state!
             method.setAccessible(true);
         }
 

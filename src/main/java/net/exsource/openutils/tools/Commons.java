@@ -15,6 +15,7 @@ import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("unused")
 public class Commons {
@@ -64,6 +65,89 @@ public class Commons {
      */
     public static String parseDateToString(Date date, DateFormat format) {
         return parseDateToString(date, format.getPattern());
+    }
+
+    /**
+     * This function converted a time value to milliseconds. The converter needed a unit
+     * which is the wish conversion unit like {@link TimeUnit#SECONDS}. If in that case
+     * the time value like 2, then will this function return 2000L.
+     *
+     * @param time the value which need conversion.
+     * @param unit the conversion unit.
+     * @return long - the converted time in milliseconds.
+     * @see TimeUnit
+     */
+    public static long convertTimeToMillis(long time, TimeUnit unit) {
+        if(time < 0) {
+            return 0L;
+        }
+        long millis = 0L;
+        switch (unit) {
+            case NANOSECONDS ->  {
+                millis = time / 1_000_000L;
+            }
+            case MICROSECONDS -> {
+                millis = time / 1000L;
+            }
+            case MILLISECONDS -> {
+                millis = time;
+            }
+            case SECONDS -> {
+                millis = time * 1000L;
+            }
+            case MINUTES -> {
+                millis = time * 60 * 1000L;
+            }
+            case HOURS -> {
+                millis = time * 60 * 60 * 1000L;
+            }
+            case DAYS -> {
+                millis = time * 24 * 60 * 60 * 1000L;
+            }
+        }
+        return millis;
+    }
+
+    /**
+     * This function is the against piece to {@link #convertTimeToMillis(long, TimeUnit)}.
+     * The function converts milliseconds to the given unit like {@link TimeUnit#SECONDS}.
+     * This can be helpful if your program need a better readable time unit format.
+     *
+     * @param time the value which need conversion.
+     * @param unit the conversion unit.
+     * @return long - the time as long because the value can grater than {@link Integer#MAX_VALUE}.
+     * @see TimeUnit
+     */
+    public static long convertMillisToUnit(long time, TimeUnit unit) {
+        if(time < 0) {
+            return 0L;
+        }
+        long result = 0L;
+        TimeUnit converter = TimeUnit.MILLISECONDS;
+        switch (unit) {
+            case NANOSECONDS -> {
+                result = converter.toNanos(time);
+            }
+            case MICROSECONDS -> {
+                result = converter.toMicros(time);
+            }
+            case MILLISECONDS -> {
+                result = time;
+            }
+            case SECONDS -> {
+                result = converter.toSeconds(time);
+            }
+            case MINUTES -> {
+                result = converter.toMinutes(time);
+            }
+            case HOURS -> {
+                result = converter.toHours(time);
+            }
+            case DAYS -> {
+                result = converter.toDays(time);
+            }
+        }
+        return result;
     }
 
     /* =================================================================================

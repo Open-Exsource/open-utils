@@ -7,6 +7,10 @@ import net.exsource.openutils.event.TestListener;
 import net.exsource.openutils.io.IOController;
 import net.exsource.openutils.io.controller.IniController;
 import net.exsource.openutils.io.controller.PropertiesController;
+import net.exsource.openutils.task.PeriodTask;
+import net.exsource.openutils.task.Task;
+import net.exsource.openutils.task.TaskManager;
+import net.exsource.openutils.task.TaskTimer;
 import net.exsource.openutils.tools.Commons;
 import net.exsource.openutils.enums.DateFormat;
 import org.junit.jupiter.api.BeforeAll;
@@ -14,6 +18,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class TestManager {
 
@@ -69,6 +74,46 @@ public class TestManager {
         logger.debug("ui-style -> " + controller.getValue("ui-style", String.class));
         logger.debug("ui-logic -> " + controller.getValue("ui-logic", String.class));
         logger.debug("====================> Ini <====================");
+    }
+
+    @Test
+    void checkTaskRunLater() throws InterruptedException {
+        TaskTimer timer = TaskManager.runTaskLater(new Task() {
+            @Override
+            public void runTask() {
+                logger.debug("This text is displayed after 5 seconds!");
+            }
+        }, 4, TimeUnit.SECONDS);
+
+        Task task = timer.getTask();
+        while (task.isAlive()) {
+            TimeUnit.SECONDS.sleep(1);
+        }
+        logger.debug("Time is up: " + task.isAlive());
+        TaskManager.flush(timer);
+    }
+
+    @Test
+    void checkRunTask() throws InterruptedException {
+        TaskTimer timer = TaskManager.runTask(new PeriodTask() {
+            int index = 0;
+
+            @Override
+            public void runTask() {
+                logger.debug("I called every second...");
+                index++;
+                if(index >= 5) {
+                    cancel();
+                }
+            }
+        }, 0, 1, TimeUnit.SECONDS);
+
+        Task task = timer.getTask();
+        while (task.isAlive()) {
+            TimeUnit.SECONDS.sleep(1);
+        }
+        logger.debug("Time is up! Dump ready: " + TaskManager.getNeedDumped().size());
+        TaskManager.cleanup();
     }
 
 }
